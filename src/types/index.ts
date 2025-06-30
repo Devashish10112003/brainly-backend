@@ -1,0 +1,32 @@
+import z from "zod";
+
+export const SignupSchema = z.object({
+    username:z.string(),
+    password:z.string(),
+    email:z.string().email(),
+})
+
+export const LoginSchema=z.object({
+    username:z.string(),
+    password:z.string()
+})
+
+export const addContentSchema=z.object({
+    title:z.string(),
+    body:z.string().optional(),
+    url:z.string().optional(),
+    type:z.enum(["NOTE","LINK","TWEET","VIDEO","DOCUMENT"]),
+})
+
+export const deleteContentSchema=z.object({
+    contentId:z.string(),
+})
+
+export const shareBrainSchema=z.object({
+    share:z.string(),
+})
+
+
+export const openBrainSchema=z.object({
+    hash:z.string(),
+})
