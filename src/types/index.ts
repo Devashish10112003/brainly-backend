@@ -23,7 +23,7 @@ export const deleteContentSchema=z.object({
 })
 
 export const shareBrainSchema=z.object({
-    share:z.string(),
+    share:z.boolean(),
 })
 
 

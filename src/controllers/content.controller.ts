@@ -18,16 +18,30 @@ export async function addContent(req:Request,res:Response){
         }
 
         const{title,body,url,type}=parsedData.data;
+        let content:any;
 
-        const content=await client.content.create({
-            data:{
-                userId:req.userId,
-                title:title,
-                body:body,
-                url:url,
-                type:type,
-            }
-        })
+        if(type=="NOTE")
+        {
+            content=await client.content.create({
+                data:{
+                    userId:req.userId,
+                    title:title,
+                    body:body,
+                    type:type,
+                }
+            })
+        }
+        else{
+            content=await client.content.create({
+                data:{
+                    userId:req.userId,
+                    title:title,
+                    url:url,
+                    type:type,
+                }
+            })
+        }
+        
 
         res.status(200).json({success:true,message:"Content added successfully",contentId:content.id});
         return;

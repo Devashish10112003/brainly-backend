@@ -20,6 +20,7 @@ model User{
   username  String
   email     String       @unique
   password  String  
+  share     Boolean      @default(false)
   contents  Content[]
   link      Link?
 }
