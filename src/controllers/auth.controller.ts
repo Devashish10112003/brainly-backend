@@ -22,16 +22,27 @@ export async function signup(req:Request,res:Response){
 
         const { email, password, username} = parsedData.data;
 
-        const existingUserByEmail=await client.user.findFirst({
+        const existingUser=await client.user.findFirst({
             where:{
-                email:email,
+                OR:[
+                    {email:email},
+                    {username:username},
+                ]
+                
             },
         })
 
-        if(existingUserByEmail)
+        if(existingUser?.email==email)
         {
             console.log("User Already exists with this email");
             res.status(400).json({messag:"User already exists with this email"});
+            return;   
+        }
+
+        if(existingUser?.username==username)
+        {
+            console.log("User Already exists with this username");
+            res.status(400).json({messag:"User already exists with this username"});
             return;   
         }
 
