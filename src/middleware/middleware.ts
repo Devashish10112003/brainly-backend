@@ -20,7 +20,6 @@ const client=new PrismaClient();
 export async function middleware(req:Request,res:Response,next:NextFunction)
 {
     try{
-
         const token=req.cookies['jwt-second-brain'];
 
         if(!token)
