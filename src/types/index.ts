@@ -13,7 +13,7 @@ export const LoginSchema=z.object({
 
 export const addContentSchema=z.object({
     title:z.string(),
-    body:z.string().optional(),
+    body:z.string(),
     url:z.string().optional(),
     type:z.enum(["NOTE","LINK","TWEET","VIDEO","DOCUMENT"]),
 })

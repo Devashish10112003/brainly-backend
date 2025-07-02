@@ -36,6 +36,7 @@ export async function addContent(req:Request,res:Response){
                 data:{
                     userId:req.userId,
                     title:title,
+                    body:body,
                     url:url,
                     type:type,
                 }
