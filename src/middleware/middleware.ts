@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { ENV_VARS } from "../config/envVars";
+import { ENV_VARS } from "../config/envVars.js";
 import { Request,Response,NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
 

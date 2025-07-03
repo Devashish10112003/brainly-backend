@@ -1,5 +1,5 @@
 import { Document } from "langchain/document";
-import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/hf_transformers";
+import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { QdrantVectorStore } from "@langchain/community/vectorstores/qdrant";
 
@@ -7,9 +7,10 @@ import { QdrantVectorStore } from "@langchain/community/vectorstores/qdrant";
 let vectorStore: QdrantVectorStore;
 
 export async function initVectorStore() {
-  const embeddings = new HuggingFaceTransformersEmbeddings({
-    modelName: "BAAI/bge-base-en",
-  });
+  const embeddings = new HuggingFaceInferenceEmbeddings({
+  model: "sentence-transformers/all-MiniLM-L6-v2",
+  apiKey: process.env.HUGGINGFACEHUB_ACCESS_TOKEN,
+});
 
   const qdrantClient = new QdrantClient({ url: "http://localhost:6333" });
   const collectionName = "content_collection";

@@ -1,36 +1,55 @@
-import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/hf_transformers";
-import { QdrantClient } from "@qdrant/js-client-rest";
-import { QdrantVectorStore } from "@langchain/community/vectorstores/qdrant";
+import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
+import { QdrantVectorStore } from "@langchain/qdrant";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import { Document } from "langchain/document";
 
-// Avoid top-level await by deferring initialization
-let vectorStore: QdrantVectorStore;
+export async function initVectorStore() 
+{
 
-export async function initVectorStore() {
-  const embeddings = new HuggingFaceTransformersEmbeddings({
-    modelName: "BAAI/bge-base-en",
+  const embeddings = new HuggingFaceInferenceEmbeddings({
+    model: "sentence-transformers/all-MiniLM-L6-v2",
+    apiKey: process.env.HUGGINGFACEHUB_ACCESS_TOKEN,
   });
 
-  const qdrantClient = new QdrantClient({ url: "http://localhost:6333" });
-
-  const collectionName = "content_collection";
-
-  vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
-    collectionName,
-    client: qdrantClient,
+    const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
+    url:process.env.QDRANT_URL,
+    collectionName: "contentEmbeddings"  
   });
 
-  console.log("✅ Vector store initialized");
+  console.log("Vector store initialized");
+  
+  return vectorStore;
+
 }
 
-export async function queryAndAskGemini(userQuery: string) {
-  if (!vectorStore) {
-    throw new Error("❌ Vector store not initialized. Call initVectorStore() first.");
+export async function embedAndStoreContent(title: string, description: string, url: string,contentId:string,vectorStore: QdrantVectorStore) 
+{
+
+  if (!vectorStore) 
+  {
+    throw new Error("Vector store not initialized. Call initVectorStore() first.");
   }
 
-  // Import Gemini-related modules only where needed
+  const content = `${title}\n${description}`;
+  const doc : Document = {
+    pageContent: content,
+    metadata: { title, url,contentId },
+  };
+
+  await vectorStore.addDocuments([doc]);
+  console.log("Content embedded and stored.");
+}
+
+export async function queryAndAskGemini(userQuery: string,vectorStore: QdrantVectorStore) 
+{
+  
+  if (!vectorStore) 
+  {
+    throw new Error("Vector store not initialized. Call initVectorStore() first.");
+  }
+
   const gemini = new ChatGoogleGenerativeAI({
     model: "gemini-pro",
     apiKey: process.env.GOOGLE_API_KEY!,
@@ -42,14 +61,14 @@ export async function queryAndAskGemini(userQuery: string) {
   const context = relevantDocs.map((doc) => doc.pageContent).join("\n---\n");
 
   const prompt = `
-You are an expert AI assistant. Based on the following context, answer the user's question:
+    You are an expert AI assistant. Based on the following context, answer the user's question:
 
-Context:
-${context}
+    Context:
+    ${context}
 
-Question:
-${userQuery}
-`;
+    Question:
+    ${userQuery}
+    `;
 
   const chain = RunnableSequence.from([
     async () => prompt,
@@ -58,5 +77,5 @@ ${userQuery}
   ]);
 
   const result = await chain.invoke({});
-  console.log("🤖 Gemini Answer:\n", result);
+  console.log("Gemini Answer:\n", result);
 }

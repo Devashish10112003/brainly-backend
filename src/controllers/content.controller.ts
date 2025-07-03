@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
-import { addContentSchema, deleteContentSchema } from "../types";
+import { addContentSchema, deleteContentSchema } from "../types/index.js";
 
 const client = new PrismaClient();
 

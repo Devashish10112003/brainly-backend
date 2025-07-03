@@ -1,8 +1,8 @@
 import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
-import { LoginSchema, SignupSchema } from "../types";
+import { LoginSchema, SignupSchema } from "../types/index.js";
 import bcrypt from "bcrypt";
-import { generateTokenAndSetCookies } from "../utils/generateToken";
+import { generateTokenAndSetCookies } from "../utils/generateToken.js";
 
 const client = new PrismaClient();
 

@@ -1,6 +1,6 @@
 import express  from "express";
-import { shareBrain,openBrain } from "../controllers/share.controller";
-import { middleware } from "../middleware/middleware";
+import { shareBrain,openBrain } from "../controllers/share.controller.js";
+import { middleware } from "../middleware/middleware.js";
 
 const router=express.Router();
 

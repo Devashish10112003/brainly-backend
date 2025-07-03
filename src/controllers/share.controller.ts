@@ -1,7 +1,7 @@
 import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
-import { shareBrainSchema } from "../types";
-import { random } from "../utils/randomHash";
+import { shareBrainSchema } from "../types/index.js";
+import { random } from "../utils/randomHash.js";
 
 const client = new PrismaClient();
 

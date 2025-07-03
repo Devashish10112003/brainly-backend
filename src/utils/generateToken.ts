@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import  {ENV_VARS}  from "../config/envVars";
+import  {ENV_VARS}  from "../config/envVars.js";
 import { Response } from "express";
 
 export function generateTokenAndSetCookies(userId:String,res:Response){
