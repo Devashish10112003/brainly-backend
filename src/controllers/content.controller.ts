@@ -1,8 +1,12 @@
 import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
 import { addContentSchema, deleteContentSchema } from "../types/index.js";
+import { getVectorStore } from "../utils/getVectorStore.js";
+import { embedAndStoreContent } from "../utils/queryAndAskGemini.js";
 
 const client = new PrismaClient();
+const vectorStore=await getVectorStore();
+
 
 export async function addContent(req:Request,res:Response){
 
@@ -17,7 +21,7 @@ export async function addContent(req:Request,res:Response){
             return;
         }
 
-        const{title,body,url,type}=parsedData.data;
+        const {title,body,url,type}=parsedData.data;
         let content:any;
 
         if(type=="NOTE")
@@ -42,8 +46,16 @@ export async function addContent(req:Request,res:Response){
                 }
             })
         }
-        
 
+        try{
+            await embedAndStoreContent(title,body,url,String(content.id),vectorStore);
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
+
+        
         res.status(200).json({success:true,message:"Content added successfully",contentId:content.id});
         return;
     }
@@ -94,6 +106,14 @@ export async function deleteContent(req:Request,res:Response){
                 id:parsedData.data.contentId
             }
         })
+
+        try{
+            await vectorStore.delete({ ids: [content.id] });
+        }
+        catch(error)
+        {
+            console.log(error);
+        }
 
         res.status(200).json({success:true,message:"Content Deleted Successfully",contentId:content.id});
         return;

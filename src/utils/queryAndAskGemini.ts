@@ -24,7 +24,7 @@ export async function initVectorStore()
 
 }
 
-export async function embedAndStoreContent(title: string, description: string, url: string,contentId:string,vectorStore: QdrantVectorStore) 
+export async function embedAndStoreContent(title: string, description: string, url: string|undefined,contentId:string,vectorStore: QdrantVectorStore) 
 {
 
   if (!vectorStore) 
@@ -32,14 +32,18 @@ export async function embedAndStoreContent(title: string, description: string, u
     throw new Error("Vector store not initialized. Call initVectorStore() first.");
   }
 
+  if(!url)
+  {
+    url="";
+  }
+
   const content = `${title}\n${description}`;
   const doc : Document = {
     pageContent: content,
-    metadata: { title, url,contentId },
+    metadata: { title,description, url,contentId },
   };
 
-  await vectorStore.addDocuments([doc]);
-  console.log("Content embedded and stored.");
+  await vectorStore.addDocuments([doc],{ids:[contentId]});
 }
 
 export async function queryAndAskGemini(userQuery: string,vectorStore: QdrantVectorStore) 
@@ -51,7 +55,7 @@ export async function queryAndAskGemini(userQuery: string,vectorStore: QdrantVec
   }
 
   const gemini = new ChatGoogleGenerativeAI({
-    model: "gemini-pro",
+    model: "gemini-2.0-flash",
     apiKey: process.env.GOOGLE_API_KEY!,
   });
 
@@ -77,5 +81,5 @@ export async function queryAndAskGemini(userQuery: string,vectorStore: QdrantVec
   ]);
 
   const result = await chain.invoke({});
-  console.log("Gemini Answer:\n", result);
+  return result;
 }
