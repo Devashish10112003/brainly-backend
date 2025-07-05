@@ -12,7 +12,6 @@ enum ContentType{
   LINK
   TWEET
   VIDEO
-  DOCUMENT
 }
 
 model User{
