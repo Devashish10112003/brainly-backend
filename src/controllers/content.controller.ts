@@ -48,7 +48,7 @@ export async function addContent(req:Request,res:Response){
         }
 
         try{
-            await embedAndStoreContent(title,body,url,String(content.id),vectorStore);
+            await embedAndStoreContent(title,body,url,type,String(content.id),vectorStore);
         }
         catch(error)
         {

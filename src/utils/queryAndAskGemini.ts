@@ -3,7 +3,65 @@ import { QdrantVectorStore } from "@langchain/qdrant";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import { Client } from "twitter-api-sdk";
 import { Document } from "langchain/document";
+import ogs from "open-graph-scraper";
+import { getTranscriptFromPython } from "./getYoutubeTranscript";
+
+
+function getTweetIdFromUrl(url: string): string | null {
+  try 
+  {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("twitter.com") || parsed.hostname.includes("x.com")) 
+    {
+      const parts = parsed.pathname.split("/");
+      return parts.find((part) => /^\d{10,}$/.test(part)) || null;
+    }
+  } 
+  catch 
+  {
+
+  }
+  return null;
+}
+
+function getYouTubeId(url: string): string | null {
+  try 
+  {
+    const parsed = new URL(url);
+    if (parsed.hostname.includes("youtu.be")) return parsed.pathname.slice(1);
+    if (parsed.hostname.includes("youtube.com")) return new URLSearchParams(parsed.search).get("v");
+  } 
+  catch 
+  {
+
+  }
+  return null;
+}
+
+export async function summarizeWithGemini(text: string): Promise<string> {
+  const gemini = new ChatGoogleGenerativeAI({
+    model: "gemini-2.0-flash",
+    apiKey: process.env.GOOGLE_API_KEY!,
+  });
+
+  const prompt = `
+  You are a helpful summarization assistant. Summarize the following content in a concise and informative way, keeping it roughly as long as a tweet (280 characters max):
+
+  Content:
+  ${text}
+  `;
+
+  const chain = RunnableSequence.from([
+    async () => prompt,
+    gemini,
+    new StringOutputParser(),
+  ]);
+
+  const summary = await chain.invoke({});
+  return summary;
+}
 
 export async function initVectorStore() 
 {
@@ -24,7 +82,7 @@ export async function initVectorStore()
 
 }
 
-export async function embedAndStoreContent(title: string, description: string, url: string|undefined,contentId:string,vectorStore: QdrantVectorStore) 
+export async function embedAndStoreContent(title: string, description: string, url: string|undefined,type:string,contentId:string,vectorStore: QdrantVectorStore) 
 {
 
   if (!vectorStore) 
@@ -32,18 +90,77 @@ export async function embedAndStoreContent(title: string, description: string, u
     throw new Error("Vector store not initialized. Call initVectorStore() first.");
   }
 
-  if(!url)
+  url ||= "";
+  let content = `${title}\n${description}`; // default fallback
+
+  if (type === "TWEET") 
   {
-    url="";
+    const tweetId = getTweetIdFromUrl(url);
+    
+    if (tweetId) 
+    {
+      const client = new Client(process.env.BEARER_TOKEN!);
+      
+      const response = await client.tweets.findTweetById(tweetId, {
+        "tweet.fields": ["text","author_id"],
+         expansions: ["author_id"],
+        "user.fields": ["username", "name"],
+      });
+      
+      const tweetText = response.data?.text || "";
+      const authorId = response.data?.author_id;
+      const user = response.includes?.users?.find((u) => u.id === authorId);
+      const username = user?.username || "unknown";
+
+      // Combine username and tweet for embedding
+      content = `@${username}: ${tweetText}`;
+    
+    }
+  } 
+  else if (type === "YOUTUBE") 
+  {
+    const videoId = getYouTubeId(url);
+    if (videoId) 
+    {
+      try 
+      {
+        const transcriptText = await getTranscriptFromPython(videoId);
+        const summary = await summarizeWithGemini(transcriptText);
+        content = summary;        
+      } 
+      catch (err) 
+      {
+        console.warn("Transcript or Gemini summarization failed:", err);
+      }
+    }
+  } 
+  else if(type==="LINK") 
+  {
+    try 
+    {
+      
+      const ogRes = await ogs({ url });
+      if (ogRes.result.success) 
+      {
+        const ogTitle = ogRes.result.ogTitle || title;
+        const ogDesc = ogRes.result.ogDescription || description;
+        const summary = await summarizeWithGemini(`${ogTitle}\n${ogDesc}`);
+
+        content = summary;  
+      }
+    } 
+    catch 
+    {
+      console.warn("Open Graph scraping failed, using fallback.");
+    }
   }
 
-  const content = `${title}\n${description}`;
-  const doc : Document = {
+  const doc: Document = {
     pageContent: content,
-    metadata: { title,description, url,contentId },
+    metadata: { title, description, url, contentId },
   };
 
-  await vectorStore.addDocuments([doc],{ids:[contentId]});
+  await vectorStore.addDocuments([doc], { ids: [contentId] });
 }
 
 export async function queryAndAskGemini(userQuery: string,vectorStore: QdrantVectorStore) 

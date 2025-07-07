@@ -29,3 +29,4 @@ Thumbs.db
 # dist or build folders (if you later output builds there)
 dist/
 build/
+venv/
