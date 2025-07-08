@@ -6,7 +6,9 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import { Client } from "twitter-api-sdk";
 import { Document } from "langchain/document";
 import ogs from "open-graph-scraper";
-import { getTranscriptFromPython } from "./getYoutubeTranscript";
+import { getTranscriptFromPython } from "./getYoutubeTranscript.js";
+import { ENV_VARS } from "../config/envVars.js";
+
 
 
 function getTweetIdFromUrl(url: string): string | null {
@@ -95,29 +97,40 @@ export async function embedAndStoreContent(title: string, description: string, u
 
   if (type === "TWEET") 
   {
-    const tweetId = getTweetIdFromUrl(url);
+    try{
+      const tweetId = getTweetIdFromUrl(url);
     
-    if (tweetId) 
-    {
-      const client = new Client(process.env.BEARER_TOKEN!);
-      
-      const response = await client.tweets.findTweetById(tweetId, {
-        "tweet.fields": ["text","author_id"],
-         expansions: ["author_id"],
-        "user.fields": ["username", "name"],
-      });
-      
-      const tweetText = response.data?.text || "";
-      const authorId = response.data?.author_id;
-      const user = response.includes?.users?.find((u) => u.id === authorId);
-      const username = user?.username || "unknown";
+      if (tweetId) 
+      {
+        const client = new Client(ENV_VARS.TWEETER_BEARER_TOKEN);
+        
+        const response = await client.tweets.findTweetById(tweetId, {
+          "tweet.fields": ["text","author_id"],
+          expansions: ["author_id"],
+          "user.fields": ["username", "name"],
+        });
 
-      // Combine username and tweet for embedding
-      content = `@${username}: ${tweetText}`;
-    
+
+        
+        const tweetText = response.data?.text || "";
+        const authorId = response.data?.author_id;
+        const user = response.includes?.users?.find((u) => u.id === authorId);
+        const username = user?.username || "unknown";
+
+        // Combine username and tweet for embedding
+        content = `@${username}: ${tweetText}`;
+        console.log(content);
+
+      
+      }
     }
+    catch(error)
+    {
+      console.warn("tweet thing failed.",error);
+    }
+    
   } 
-  else if (type === "YOUTUBE") 
+  else if (type === "VIDEO") 
   {
     const videoId = getYouTubeId(url);
     if (videoId) 

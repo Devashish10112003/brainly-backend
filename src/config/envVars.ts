@@ -13,4 +13,6 @@ function getEnvVariable(name: string): string {
 export const ENV_VARS = {
   PORT: process.env.PORT || "5000", // PORT can be optional or default
   JWT_SECRET: getEnvVariable("JWT_SECRET"),
+  TWEETER_BEARER_TOKEN:getEnvVariable("TWEETER_BEARER_TOKEN"),
+  
 };
