@@ -15,7 +15,10 @@ const app=express();
 const PORT=ENV_VARS.PORT;
 app.use(express.json());
 app.use(coookieParser());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', 
+    credentials: true,
+}));
 
 let store=initVectorStore();
 
