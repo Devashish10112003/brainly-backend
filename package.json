@@ -15,11 +15,7 @@
   "dependencies": {
     "@huggingface/inference": "^4.3.1",
     "@huggingface/transformers": "^3.6.1",
-    "@langchain/community": "^0.3.47",
-    "@langchain/core": "^0.3.61",
-    "@langchain/google-genai": "^0.2.14",
-    "@langchain/qdrant": "^0.1.2",
-    "@prisma/client": "^6.10.1",
+    "@prisma/client": "^6.19.2",
     "@qdrant/js-client-rest": "^1.14.1",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
@@ -30,11 +26,10 @@
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "groq-sdk": "^0.37.0",
     "jsonwebtoken": "^9.0.2",
-    "langchain": "^0.3.29",
     "open-graph-scraper": "^6.10.0",
     "pdf-parser": "^1.0.5",
-    "puppeteer": "^24.11.2",
     "qdrant-client": "^0.0.1",
     "twitter-api-sdk": "^1.2.1",
     "typescript": "^5.8.3",
@@ -43,8 +38,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
-    "@types/dotenv": "^8.2.3",
     "@types/jsonwebtoken": "^9.0.10",
-    "prisma": "^6.10.1"
+    "prisma": "^6.19.2"
   }
 }

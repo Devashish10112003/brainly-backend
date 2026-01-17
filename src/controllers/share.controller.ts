@@ -72,7 +72,7 @@ export async function openBrain(req:Request,res:Response){
     
         const link=await client.link.findUnique({
             where:{
-                hash:brainLink,
+                hash:brainLink.toString(),
             },
             select:{
                 userId:true,

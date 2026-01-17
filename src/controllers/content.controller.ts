@@ -2,7 +2,7 @@ import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
 import { addContentSchema, deleteContentSchema } from "../types/index.js";
 import { getVectorStore } from "../utils/getVectorStore.js";
-import { embedAndStoreContent } from "../utils/queryAndAskGemini.js";
+import { embedAndStoreContent } from "../utils/queryAndAskLLM.js";
 
 const client = new PrismaClient();
 const vectorStore=await getVectorStore();
@@ -108,7 +108,7 @@ export async function deleteContent(req:Request,res:Response){
         })
 
         try{
-            await vectorStore.delete({ ids: [content.id] });
+            await vectorStore.delete(content.id);
         }
         catch(error)
         {

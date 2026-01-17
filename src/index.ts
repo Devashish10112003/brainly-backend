@@ -9,7 +9,7 @@ import coookieParser from "cookie-parser";
 
 
 import { ENV_VARS } from "./config/envVars.js";
-import { initVectorStore} from "./utils/queryAndAskGemini.js";
+import { initVectorStore } from "./utils/queryAndAskLLM.js";
 
 const app=express();
 const PORT=ENV_VARS.PORT;

@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { getVectorStore } from "../utils/getVectorStore.js";
-import { queryAndAskGemini } from "../utils/queryAndAskGemini.js";
+import { queryAndAskLLM } from "../utils/queryAndAskLLM.js";
 import { askBotSchema } from "../types/index.js";
 
 const vectorStore=await getVectorStore();
@@ -10,7 +10,6 @@ export async function askBot(req:Request,res:Response){
     try
     {
         const parsedData=askBotSchema.safeParse(req.body);
-    
         if(!parsedData.success)
         {
             console.log("Insufficient data");
@@ -19,8 +18,7 @@ export async function askBot(req:Request,res:Response){
         }
 
         const message=parsedData.data.message;
-        
-        const result=await queryAndAskGemini(message,vectorStore);
+        const result = await queryAndAskLLM(message,vectorStore);
         res.status(200).json({success:true,message:"Got the response successfully",result:result});
     }
     catch(error)
