@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
-import { shareBrainSchema } from "../types/index.js";
+import { shareBrainSchema, shareContentSchema } from "../types/index.js";
 import { random } from "../utils/randomHash.js";
 
 const client = new PrismaClient();
@@ -99,4 +99,63 @@ export async function openBrain(req:Request,res:Response){
         res.status(500).json({success:false,message:"Error in the openBrain handler",error:error});
         return;
     }    
+}
+
+export async function shareContent(req:Request,res:Response)
+{
+    try{
+        const parsedData=shareContentSchema.safeParse(req.body);
+        
+        if(!parsedData.success)
+        {
+            console.log("Insufficient Data");
+            res.status(400).json({messag:"No contentId provided"});
+            return;
+        }
+
+        const userId=req.userId;
+
+        const content=await client.content.update({
+            where:{
+                id:parsedData.data.contentId,
+                userId:userId
+            },
+            data:{
+                share:true,
+            },
+            select:{
+                id:true,
+            }
+        });
+
+        res.status(200).json({success:true,message:"Shared the content successfully",content:content});
+    }
+    catch(error){
+        res.status(500).json({success:false,message:"Error in shareContent handler",error:error});
+        return;
+    }
+}
+
+export async function openContent(req:Request,res:Response)
+{
+    try{
+        const contentId=req.params.contentId;
+        const content=await client.content.findFirst({
+            where:{
+                id:contentId.toString(),
+                share:true,
+            },
+        });
+
+        if(content==null)
+        {
+            res.status(400).json({success:false,message:"No content shared with this id"});
+        }
+
+        res.status(200).json({success:true,message:"Got the content successfully",content:content});
+    }
+    catch(error){
+        res.status(500).json({success:false,message:"Error in shareContent handler",error:error});
+        return;
+    }
 }

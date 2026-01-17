@@ -31,6 +31,10 @@ export const openBrainSchema=z.object({
     hash:z.string(),
 })
 
+export const shareContentSchema=z.object({
+    contentId:z.string(),
+})
+
 export const askBotSchema=z.object({
     message:z.string(),
 })

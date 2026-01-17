@@ -31,6 +31,7 @@ model Content{
   url       String?
   type      ContentType
   createdAt DateTime     @default(now())
+  share     Boolean      @default(false)
   userId    String
   user      User         @relation(fields: [userId],references: [id])
 }

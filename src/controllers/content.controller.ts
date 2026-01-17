@@ -92,6 +92,7 @@ export async function getAllContent(req:Request,res:Response){
 export async function deleteContent(req:Request,res:Response){
     try
     {
+        const userId=req.userId;
         const parsedData=deleteContentSchema.safeParse(req.body);
 
         if(!parsedData.success)
@@ -103,7 +104,8 @@ export async function deleteContent(req:Request,res:Response){
 
         const content=await client.content.delete({
             where:{
-                id:parsedData.data.contentId
+                id:parsedData.data.contentId,
+                userId:userId
             }
         })
 
