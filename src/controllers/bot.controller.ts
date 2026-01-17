@@ -1,6 +1,6 @@
 import { Request,Response } from "express"
-import { getVectorStore } from "../utils/getVectorStore.js";
-import { queryAndAskLLM } from "../utils/queryAndAskLLM.js";
+import { getVectorStore } from "../rag/getVectorStore.js";
+import { queryAndAskLLM } from "../rag/queryAndAskLLM.js";
 import { askBotSchema } from "../types/index.js";
 
 const vectorStore=await getVectorStore();

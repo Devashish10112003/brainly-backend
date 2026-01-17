@@ -1,8 +1,8 @@
 import { Request,Response } from "express"
 import { PrismaClient } from "@prisma/client";
 import { addContentSchema, deleteContentSchema } from "../types/index.js";
-import { getVectorStore } from "../utils/getVectorStore.js";
-import { embedAndStoreContent } from "../utils/queryAndAskLLM.js";
+import { getVectorStore } from "../rag/getVectorStore.js";
+import { embedAndStoreContent } from "../rag/injest.js";
 
 const client = new PrismaClient();
 const vectorStore=await getVectorStore();
