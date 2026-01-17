@@ -7,13 +7,13 @@ import { ENV_VARS } from "../config/envVars.js";
 import ogs from "open-graph-scraper";
 
 const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY!,
+    apiKey: ENV_VARS.GROQ_API_KEY,
   });
 
-const hf = new HfInference(process.env.HUGGINGFACEHUB_ACCESS_TOKEN);
+const hf = new HfInference(ENV_VARS.HUGGINGFACEHUB_ACCESS_TOKEN);
 
 const qdrant = new QdrantClient({
-  url: process.env.QDRANT_URL,
+  url: ENV_VARS.QDRANT_URL,
 });
 
 const COLLECTION_NAME = "contentEmbeddings";
@@ -84,7 +84,6 @@ export async function summarizeWithLLM(text:string) {
 }
 
 export async function initVectorStore() {
-  // Ensure collection exists
   const collections = await qdrant.getCollections();
   const exists = collections.collections.some(
     (c) => c.name === COLLECTION_NAME
@@ -238,11 +237,9 @@ if (!vectorStore) {
     throw new Error("Vector store not initialized. Call initVectorStore() first.");
   }
 
-  // 1️⃣ Embed query (retrieval-style instruction)
   const retrievalQuery = `Represent this sentence for retrieval: ${userQuery}`;
   const queryEmbedding = await vectorStore.embedText(retrievalQuery);
 
-  // 2️⃣ Vector search
   const results = await vectorStore.search(queryEmbedding, 4);
 
   const context = results
@@ -250,20 +247,18 @@ if (!vectorStore) {
     .filter(Boolean)
     .join("\n---\n");
 
-  // 3️⃣ Build prompt
   const prompt = `
-You are an expert AI assistant.
-Answer the user's question using ONLY the provided context.
-If the answer is not in the context, say you don't know.
+    You are an expert AI assistant.
+    Answer the user's question using ONLY the provided context.
+    If the answer is not in the context, say you don't know.
 
-Context:
-${context}
+    Context:
+    ${context}
 
-Question:
-${userQuery}
-`;
+    Question:
+    ${userQuery}
+    `;
 
-  // 4️⃣ Ask Groq
   const response = await groq.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     messages: [{ role: "user", content: prompt }],
