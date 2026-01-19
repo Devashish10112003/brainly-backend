@@ -120,6 +120,33 @@ export async function login(req:Request,res:Response){
     }
 }
 
+export async function getUser(req:Request,res:Response){
+    try
+    {
+        const userId=req.userId;
+        const user=await client.user.findUnique({
+            where:{id:userId},
+            select:{
+                username:true,
+                email:true,
+            }
+        });
+
+        if(!user)
+        {
+            res.status(404).json({success:false,message:"User not found"});
+            return;
+        }
+
+        res.status(200).json({success:true,user:user});
+    }
+    catch(error)
+    {
+        console.log("Error in getUser controller",error);
+        res.status(500).json({success:false,message:"Internal server error",error:error});
+    }
+}
+
 export function logout(req:Request,res:Response){
     try
     {

@@ -45,7 +45,7 @@ export async function shareBrain(req:Request,res:Response){
                 })
             }
 
-            res.status(200).json({success:true,message:"Link Shared Successfully",link:`${req.protocol}://${req.get("host")}/api/v1/share/${exisitingLink.hash}` });
+            res.status(200).json({success:true,message:"Link Shared Successfully",link:`/share/${exisitingLink.hash}` });
             return;
         }
         else
