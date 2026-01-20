@@ -1,7 +1,7 @@
 import { groqClient } from "../infra/llm/groqClient.js";
 import type { VectorStore } from "../types/vectorStoreType.js";
 
-export async function queryAndAskLLM(userQuery:string,vectorStore:VectorStore){
+export async function queryAndAskLLM(userQuery:string,vectorStore:VectorStore,userId:string){
     if (!vectorStore) {
         throw new Error("Vector store not initialized. Call initVectorStore() first.");
       }
@@ -9,7 +9,15 @@ export async function queryAndAskLLM(userQuery:string,vectorStore:VectorStore){
       const retrievalQuery = `Represent this sentence for retrieval: ${userQuery}`;
       const queryEmbedding = await vectorStore.embedText(retrievalQuery);
     
-      const results = await vectorStore.search(queryEmbedding, 4);
+      // Scope retrieval to the current user's documents only
+      const results = await vectorStore.search(queryEmbedding, 4, {
+        must: [
+          {
+            key: "userId",
+            match: { value: userId },
+          },
+        ],
+      });
     
       const context = results
         .map((r: any) => r.payload?.content)

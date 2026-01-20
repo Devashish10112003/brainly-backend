@@ -33,6 +33,7 @@ export async function embedAndStoreContent(
   url: string | undefined,
   type: ContentType,
   contentId: string,
+  userId: string,
   vectorStore: VectorStore
 ) {
   if (!vectorStore) {
@@ -64,6 +65,7 @@ export async function embedAndStoreContent(
     type,
     contentId,
     content,
+    userId,
     createdAt: new Date().toISOString(),
   });
 }

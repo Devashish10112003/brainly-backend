@@ -48,10 +48,12 @@ export async function initVectorStore() {
         });
       },
   
-      search: async (queryVector: number[], limit = 5) => {
+      search: async (queryVector: number[], limit = 5, filter?: unknown) => {
         const results = await qdrant.search(COLLECTION_NAME, {
           vector: queryVector,
           limit,
+          // Optional filter, typically used to scope by userId
+          filter: filter as any,
         });
   
         return results;

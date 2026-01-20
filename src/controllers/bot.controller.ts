@@ -18,7 +18,7 @@ export async function askBot(req:Request,res:Response){
         }
 
         const message=parsedData.data.message;
-        const result = await queryAndAskLLM(message,vectorStore);
+        const result = await queryAndAskLLM(message,vectorStore,req.userId);
         res.status(200).json({success:true,message:"Got the response successfully",result:result});
     }
     catch(error)
