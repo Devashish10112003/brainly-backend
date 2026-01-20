@@ -5,7 +5,6 @@ export async function queryAndAskLLM(userQuery:string,vectorStore:VectorStore,us
     if (!vectorStore) {
         throw new Error("Vector store not initialized. Call initVectorStore() first.");
       }
-    
       const retrievalQuery = `Represent this sentence for retrieval: ${userQuery}`;
       const queryEmbedding = await vectorStore.embedText(retrievalQuery);
     
@@ -18,7 +17,7 @@ export async function queryAndAskLLM(userQuery:string,vectorStore:VectorStore,us
           },
         ],
       });
-    
+    console.log(results);
       const context = results
         .map((r: any) => r.payload?.content)
         .filter(Boolean)
@@ -36,13 +35,17 @@ export async function queryAndAskLLM(userQuery:string,vectorStore:VectorStore,us
         ${userQuery}
         `;
     
+      console.log("Hi there 1");
+
       const response = await groqClient.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 400,
       });
-    
+      
+      console.log(response);
+
       return response.choices[0]?.message?.content?.trim() || "";
     }
     

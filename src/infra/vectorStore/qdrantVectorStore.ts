@@ -6,6 +6,7 @@ const COLLECTION_NAME = "contentEmbeddings";
 
 export const qdrant = new QdrantClient({
     url: ENV_VARS.QDRANT_URL,
+    apiKey:ENV_VARS.QDRANT_API_KEY
 });
 
 export async function initVectorStore() {
@@ -21,6 +22,16 @@ export async function initVectorStore() {
           distance: "Cosine",
         },
       });
+    }
+
+    // Ensure there is a payload index on `userId` so we can filter by it
+    try {
+      await qdrant.createPayloadIndex(COLLECTION_NAME, {
+        field_name: "userId",
+        field_schema: "keyword",
+      });
+    } catch {
+      // If index already exists, Qdrant will throw; ignore that case
     }
   
     console.log("Vector store initialized");
