@@ -16,4 +16,4 @@ ENV NODE_ENV=production
 RUN npx prisma generate  
 RUN npm run build
 
-CMD ["npm","run","start"]
+CMD ["sh", "-c", "npm run migrate && npm run start"]
