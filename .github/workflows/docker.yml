@@ -28,7 +28,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/backend:latest
-            ${{ secrets.DOCKER_USERNAME }}/backend:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/brainly-backend:latest
+            ${{ secrets.DOCKER_USERNAME }}/brainly-backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
